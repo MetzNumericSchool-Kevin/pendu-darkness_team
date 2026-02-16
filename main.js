@@ -4,6 +4,7 @@ const placeLettre = document.querySelector("#word-display")
 const nbErreur = document.querySelector("#errors")
 let compteErreur = 0
 const contLettresJouees = document.querySelector("#letters-used")
+
 // const nvlPartie = document.querySelector('.btn-primary')
 
 window.addEventListener("load", () => {
@@ -34,20 +35,27 @@ document.addEventListener('keydown', (event) => {
     const key = event.key
     console.log(key)
     
-
-    for (i = 0; i < mot.length; i++) {
-        if (mot[i] == key) {
-            console.log(`Lettre trouvé à la position ${i}`)
-            placeLettre.children[i].textContent = key
+    if (!/^[a-z]$/.test(key)) {
+        alert("Veuillez taper une lettre entre A et Z !");
+    } else {
+        for (i = 0; i < mot.length; i++) {
+            if (mot[i] == key) {
+                console.log(`Lettre trouvé à la position ${i}`)
+                placeLettre.children[i].textContent = key
         }   
     }
-    if (!mot.includes(key)) {
-        console.log (compteErreur)
-        compteErreur += 1
-        nbErreur.textContent = compteErreur + "/5"
-    }
-    const lettresJouees = document.createElement("span") 
-    contLettresJouees.appendChild(lettresJouees)
-    lettresJouees.textContent = key 
+        if (!mot.includes(key)) {
+            console.log (compteErreur)
+            compteErreur += 1
+            nbErreur.textContent = compteErreur + "/5"
+            const pendu = document.querySelector("#error-" + compteErreur)
+            console.log(pendu)
+            pendu.removeClass("hidden")
+            pendu.classList.add("view")
+        }
+        const lettresJouees = document.createElement("span") 
+        contLettresJouees.appendChild(lettresJouees)
+        lettresJouees.textContent = key
+        }     
 })
 
