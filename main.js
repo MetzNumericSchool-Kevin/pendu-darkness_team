@@ -50,7 +50,7 @@ document.addEventListener('keydown', (event) => {
             nbErreur.textContent = compteErreur + "/5"
             const pendu = document.querySelector("#error-" + compteErreur)
             console.log(pendu)
-            pendu.removeClass("hidden")
+            pendu.classList.remove("hidden")
             pendu.classList.add("view")
         }
         const lettresJouees = document.createElement("span") 
