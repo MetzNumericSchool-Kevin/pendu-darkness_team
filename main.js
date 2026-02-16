@@ -9,15 +9,10 @@ document.addEventListener('keydown', (event) => {
     console.log(key)
 
     for (i = 0; i < mot.length; i++) {
-        if (mot[i] == key)
+        if (mot[i] == key) {
             console.log(`Lettre trouvé à la position ${i}`)
-            placeLettre.children[i + 1].innerHTML = key
+            placeLettre.children[i].textContent = key
+        }
     }
-
-
-
-
-
-
 })
 
