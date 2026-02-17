@@ -1,111 +1,114 @@
-//Utilisation de local storage pour stocker les données (mots, essais, etc...)
-
-const lettresDejaJouees = [];
-const mots = ["pendu", "pendule", "javascript"];
+// DOM Elements
 const placeLettre = document.querySelector("#word-display");
 const contLettresJouees = document.querySelector("#letters-used");
 const nbErreur = document.querySelector("#errors");
 const btnNew = document.querySelector(".btn-primary");
 
+// Données du jeu
+const mots = ["pendu", "pendule", "javascript"];
 let mot = "";
+let lettresDejaJouees = [];
 let compteErreur = 0;
+const maxErreurs = 5;
 
-
+// ========================================
 // Fonction pour démarrer une nouvelle partie
+// ========================================
 function nouvellePartie() {
+    // Réinitialiser variables
+    compteErreur = 0;
+    lettresDejaJouees = [];
+    nbErreur.textContent = `0/${maxErreurs}`;
+    contLettresJouees.innerHTML = "";
+    placeLettre.innerHTML = "";
 
-	// Tirer un mot aléatoire depuis la liste
-	mot = mots[Math.floor(Math.random() * mots.length)];
-	console.log("Mot choisi :", mot);
+    // Réinitialiser le pendu
+    for (let i = 1; i <= maxErreurs; i++) {
+        const pendu = document.querySelector(`#error-${i}`);
+        if (pendu) {
+            pendu.classList.remove("view");
+            pendu.classList.add("hidden");
+        }
+    }
 
-	for (i= 0; i < 5; i++) {
+    // Tirer un mot aléatoire
+    mot = mots[Math.floor(Math.random() * mots.length)];
+    console.log("Mot choisi :", mot);
 
-		console.log(`avant traitement ${compteErreur}`)
-		const pendu = document.querySelector("#error-" + compteErreur);
-		pendu.classList.remove("view");
-		pendu.classList.add("hidden");
-		compteErreur -= 1
-		console.log(`après traitement ${compteErreur}`)
+    // Créer les placeholders pour le mot
+    for (let i = 0; i < mot.length; i++) {
+        const span = document.createElement("span");
+        span.classList.add("letter-placeholder");
+        placeLettre.appendChild(span);
+    }
 
-	}
-
-	// Réinitialiser variables
-	compteErreur = 0;
-	lettresDejaJouees.length = 0; // vide le tableau
-
-	if (nbErreur) nbErreur.textContent = "0/5";
-	contLettresJouees.innerHTML = "";
-	placeLettre.innerHTML = "";
-
-	// Créer les placeholders pour le mot
-	for (let i = 0; i < mot.length; i++) {
-		const span = document.createElement("span");
-		span.classList.add("letter-placeholder");
-		placeLettre.appendChild(span);
-	}
-
-	const pendu = document.querySelector("#error-" + compteErreur);
+    // Réactiver l'écoute clavier
+    document.removeEventListener("keydown", handleKey);
+    document.addEventListener("keydown", handleKey);
 }
 
-// Bouton Nouvelle Partie
-btnNew.addEventListener("click", () => {
-	nouvellePartie();
-});
-
-// Démarrer le jeu automatiquement au chargement
-window.addEventListener("load", () => {
-	nouvellePartie();
-});
-
+// ========================================
+// Fonction de gestion des touches clavier
+// ========================================
 function handleKey(event) {
-	if (compteErreur >= 5) return; // stop si déjà 5 erreurs
+    if (compteErreur >= maxErreurs) return;
 
-	const key = event.key.toLowerCase();
+    const key = event.key.toLowerCase();
 
-	if (!/^[a-z]$/.test(key)) {
-		alert("Veuillez taper une lettre entre A et Z !");
-		return;
-	}
+    // Vérification de la lettre
+    if (!/^[a-z]$/.test(key)) {
+        alert("Veuillez taper une lettre entre A et Z !");
+        return;
+    }
 
-	if (lettresDejaJouees.includes(key)) {
-		alert("Lettre déjà utilisée");
-		return;
-	}
+    if (lettresDejaJouees.includes(key)) {
+        alert("Lettre déjà utilisée");
+        return;
+    }
 
-	lettresDejaJouees.push(key);
+    lettresDejaJouees.push(key);
 
-	const lettresJouees = document.createElement("div");
-	lettresJouees.classList.add("badge");
-	lettresJouees.textContent = key;
+    // Créer le badge pour la lettre jouée
+    const lettresJouees = document.createElement("div");
+    lettresJouees.classList.add("badge");
+    lettresJouees.textContent = key;
 
-	let trouve = false;
-	for (let i = 0; i < mot.length; i++) {
-		if (mot[i] === key) {
-			console.log(`Lettre trouvée à la position ${i}`);
-			placeLettre.children[i].textContent = key;
-			trouve = true;
-		}
-	}
+    // Vérifier si la lettre est dans le mot
+    let trouve = false;
+    for (let i = 0; i < mot.length; i++) {
+        if (mot[i] === key) {
+            placeLettre.children[i].textContent = key;
+            trouve = true;
+        }
+    }
 
-	if (trouve) {
-		lettresJouees.classList.add("badge-success");
+    if (trouve) {
+        lettresJouees.classList.add("badge-success");
+    } else {
+        compteErreur++;
+        nbErreur.textContent = `${compteErreur}/${maxErreurs}`;
+        const pendu = document.querySelector(`#error-${compteErreur}`);
+        if (pendu) {
+            pendu.classList.remove("hidden");
+            pendu.classList.add("view");
+        }
+        lettresJouees.classList.add("badge-error");
+    }
 
-	} else {
-		compteErreur += 1;
-		nbErreur.textContent = compteErreur + "/5";
-		const pendu = document.querySelector("#error-" + compteErreur);
-		pendu.classList.remove("hidden");
-		pendu.classList.add("view");
-		lettresJouees.classList.add("badge-error");
-	}
+    contLettresJouees.appendChild(lettresJouees);
 
-	contLettresJouees.appendChild(lettresJouees);
-
-	if (compteErreur === 5) {
-		alert("Partie terminée");
-		nouvellePartie()
-		document.removeEventListener("keydown", handleKey);
+    // Fin de partie si max erreurs atteint
+    if (compteErreur === maxErreurs) {
+    // Laisser le temps au DOM de se mettre à jour
+		setTimeout(() => {
+			alert("Partie terminée");
+			document.removeEventListener("keydown", handleKey);
+		}, 50); // 50ms suffisent
 	}
 }
 
-document.addEventListener("keydown", handleKey);
+// ========================================
+// Événements
+// ========================================
+btnNew.addEventListener("click", nouvellePartie);
+window.addEventListener("load", nouvellePartie);
